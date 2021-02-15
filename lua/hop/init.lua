@@ -52,15 +52,17 @@ local function hint_with(mode, opts)
   local cursor_line = win_view['lnum']
   local cursor_col = win_view['col']
   local win_top_line = win_view['topline'] - 1
-  -- NOTE: due to an (unknown yet) bug in neovim, the sign_width is not correctly reported when shifting the window
-  -- view inside a non-wrap window, so we can’t rely on this; for this reason, we have to implement a weird hack that
-  -- is going to disable the signs while hop is running (I’m sorry); the state is restored after jump
-  -- local left_col_offset = win_info.variables.context.number_width + win_info.variables.context.sign_width
+  -- -- NOTE: due to an (unknown yet) bug in neovim, the sign_width is not correctly reported when shifting the window
+  -- -- view inside a non-wrap window, so we can’t rely on this; for this reason, we have to implement a weird hack that
+  -- -- is going to disable the signs while hop is running (I’m sorry); the state is restored after jump
+  -- -- local left_col_offset = win_info.variables.context.number_width + win_info.variables.context.sign_width
 
-  -- hack to get the left column offset
-  vim.api.nvim_win_set_cursor(0, { cursor_line, 0 })
-  local left_col_offset = vim.fn.wincol() - 1
-  vim.fn.winrestview(win_view)
+  -- -- hack to get the left column offset
+  -- vim.api.nvim_win_set_cursor(0, { cursor_line, 0 })
+  -- local left_col_offset = vim.fn.wincol() - 1
+  -- vim.fn.winrestview(win_view)
+
+  local left_col_offset = vim.api.nvim_win_get_buftext_offset(0) - 1
 
   local win_width = win_info.width - left_col_offset
   local win_real_height = vim.api.nvim_win_get_height(0)
