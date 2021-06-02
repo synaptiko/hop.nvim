@@ -10,6 +10,7 @@ M.opts = defaults
 function M.setup(opts)
   -- Look up keys in user-defined table with fallback to defaults.
   M.opts = setmetatable(opts, {__index = defaults})
+  error('This branch is deprecated and will be deleted soon; you are strongly advised to switch to the default branch of Hop.')
 end
 
 -- Allows to override global options with user local overrides.
