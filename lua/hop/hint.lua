@@ -230,6 +230,22 @@ local function create_hints_for_line(
   return hint_counts
 end
 
+-- Create hints for a set of lines to allow to jump to.
+--
+-- Parameters:
+--   - hint_mode: the hint mode to apply. You can find a list of them at the top of this file. Modes are regular
+--     Lua object, which must have two properties:
+--     - oneshot: whether the hint mode is supposed to match only one thing for each line. Said otherwise, once the mode
+--       has been triggered for a given line, it will stop immediately and the next line will be scanned.
+--     - match: a function of a string line, returning a pair of indices in the line representing the beginning and the
+--       end of the matched portion by the hint mode.
+--   - win_width: window width. Used only with 'nowrap'.
+--   - cursor_pos: pair of (line, col) where the cursor is currently at.
+--   - col_offset: column offset applied to the current view.
+--   - top_line: top line of the current buffer.
+--   - lines: lines in the buffer to hint
+--   - direction: optional (~= nil) direction to hint to. See HintDirection.
+--   - opts: regular user options.
 function M.create_hints(hint_mode, win_width, cursor_pos, col_offset, top_line, lines, direction, opts)
   -- extract all the words currently visible on screen; the hints variable contains the list
   -- of words as a pair of { line, column } for each word on a given line and indirect_words is a
@@ -330,12 +346,12 @@ function M.create_hints(hint_mode, win_width, cursor_pos, col_offset, top_line, 
   table.sort(indirect_hints, dist_comparison)
 
   -- generate permutations and update the lines with hints
-  local perms = perm.permutations(opts.keys, #indirect_hints, opts)
+  local perms = perm.permutations(opts.keys, #indirect_hints, nil, nil, opts)
   for i, indirect in pairs(indirect_hints) do
     hints[indirect.i].hints[indirect.j].hint = tbl_to_str(perms[i])
   end
 
-  return hints,  hint_counts
+  return hints, hint_counts
 end
 
 function M.set_hint_extmarks(hl_ns, per_line_hints)

@@ -89,7 +89,10 @@ end
 --
 -- Permutations are sorted by dimensions, so you will get 1-perm first, then 2-perm, 3-perm, etc. depending on the size
 -- of the keys.
-function M.TermSeqBias:permutations(keys, n, opts)
+--
+-- It is possible to use this function in a corecursive way; the 'prev_perms' and 'prev_perm' arguments, if not nil, will
+-- be reused as based of the initial permutation set, allowing to generate more and more permutations.
+function M.TermSeqBias:permutations(keys, n, prev_perms, prev_perm, opts)
   local quarter = #keys * opts.term_seq_bias
   local term_keys = keys:sub(1, quarter)
   local seq_keys = keys:sub(quarter + 1)
@@ -101,7 +104,7 @@ function M.TermSeqBias:permutations(keys, n, opts)
     perms[#perms + 1] = vim.deepcopy(perm)
   end
 
-  return perms
+  return perms, perm
 end
 
 -- Permutation algorithm based on tries and backtrack filling.
@@ -242,8 +245,8 @@ function M.TrieBacktrackFilling:permutations(keys, n)
   return perms
 end
 
-function M.permutations(keys, n, opts)
-  return opts.perm_method:permutations(keys, n, opts)
+function M.permutations(keys, n, base_perms, base_perm, opts)
+  return opts.perm_method:permutations(keys, n, base_perms, base_perm, opts)
 end
 
 return M

@@ -49,16 +49,16 @@ local function grey_things_out(buf_handle, hl_ns, top_line, bottom_line, directi
   end
 end
 
--- Hint the whole visible part of the buffer.
+-- Hint the whole visible part of a buffer (i.e. window).
 --
 -- The 'hint_mode' argument is the mode to use to hint the buffer.
-local function hint_with(hint_mode, opts)
+local function hint_win_with(winid, hint_mode, opts)
   -- get a bunch of information about the window and the cursor
-  local win_info = vim.fn.getwininfo(vim.api.nvim_get_current_win())[1]
+  local win_info = vim.fn.getwininfo(winid)[1]
   local win_view = vim.fn.winsaveview()
   local top_line = win_info.topline - 1
   local bot_line = win_info.botline - 1
-  local cursor_pos = vim.api.nvim_win_get_cursor(0)
+  local cursor_pos = vim.api.nvim_win_get_cursor(winid)
 
   -- adjust the visible part of the buffer to hint based on the direction
   local direction = opts.direction
@@ -169,6 +169,10 @@ local function hint_with(hint_mode, opts)
   end
 end
 
+local function hint_current_win_with(hint_mode, opts)
+  hint_win_with(vim.api.nvim_get_current_win(),  hint_mode, opts)
+end
+
 -- Refine hints in the given buffer.
 --
 -- Refining hints allows to advance the state machine by one step. If a terminal step is reached, this function jumps to
@@ -207,7 +211,7 @@ function M.quit(buf_handle, hl_ns)
 end
 
 function M.hint_words(opts)
-  hint_with(hint.by_word_start, get_command_opts(opts))
+  hint_current_win_with(hint.by_word_start, get_command_opts(opts))
 end
 
 function M.hint_patterns(opts)
@@ -224,14 +228,14 @@ function M.hint_patterns(opts)
     return
   end
 
-  hint_with(hint.by_case_searching(pat, false, opts), opts)
+  hint_current_win_with(hint.by_case_searching(pat, false, opts), opts)
 end
 
 function M.hint_char1(opts)
   opts = get_command_opts(opts)
   local ok, c = pcall(vim.fn.getchar)
   if not ok then return end
-  hint_with(hint.by_case_searching(vim.fn.nr2char(c), true, opts), opts)
+  hint_current_win_with(hint.by_case_searching(vim.fn.nr2char(c), true, opts), opts)
 end
 
 function M.hint_char2(opts)
@@ -241,11 +245,11 @@ function M.hint_char2(opts)
   local ok2, b = pcall(vim.fn.getchar)
   if not ok2 then return end
   local pat = vim.fn.nr2char(a) .. vim.fn.nr2char(b)
-  hint_with(hint.by_case_searching(pat, true, opts), opts)
+  hint_current_win_with(hint.by_case_searching(pat, true, opts), opts)
 end
 
 function M.hint_lines(opts)
-  hint_with(hint.by_line_start, get_command_opts(opts))
+  hint_current_win_with(hint.by_line_start, get_command_opts(opts))
 end
 
 -- Setup user settings.
