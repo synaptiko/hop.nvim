@@ -55,6 +55,16 @@ function M.by_case_searching(pat, plain_search, opts)
   }
 end
 
+-- Current line hint mode
+--
+-- Used to constrain scope of hopping to current line only
+function M.by_case_searching_line(pat, plain_search, opts)
+    local m = M.by_case_searching(pat, plain_search, opts)
+    m.curr_line_only = true
+
+    return m
+end
+
 -- Word hint mode.
 --
 -- Used to tag words with hints, its behaviour depends on the
@@ -253,6 +263,13 @@ function M.create_hints(hint_mode, win_width, cursor_pos, col_offset, top_line, 
   local hints = {}
   local indirect_hints = {}
   local hint_counts = 0
+	local start_offset
+
+	if opts.start_offset == nil then
+		start_offset = 0
+	else
+		start_offset = opts.start_offset
+	end
 
   -- in the case of a direction, we want to treat the first or last line (according to the direction) differently
   if direction == M.HintDirection.AFTER_CURSOR then
@@ -267,7 +284,7 @@ function M.create_hints(hint_mode, win_width, cursor_pos, col_offset, top_line, 
       cursor_pos,
       col_offset,
       top_line,
-      { cursor_col = cursor_pos[2], direction = direction },
+      { cursor_col = cursor_pos[2] + start_offset, direction = direction },
       lines
     )
 
@@ -314,7 +331,7 @@ function M.create_hints(hint_mode, win_width, cursor_pos, col_offset, top_line, 
       cursor_pos,
       col_offset,
       top_line,
-      { cursor_col = cursor_pos[2], direction = direction },
+      { cursor_col = cursor_pos[2] + start_offset, direction = direction },
       lines
     )
   else

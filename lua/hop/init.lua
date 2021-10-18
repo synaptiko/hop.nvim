@@ -103,16 +103,24 @@ local function hint_with(hint_mode, opts)
   local top_line = win_info.topline - 1
   local bot_line = win_info.botline - 1
   local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	local start_offset
+
+	if opts.start_offset == nil then
+		start_offset = 0
+	else
+		start_offset = opts.start_offset
+	end
+
 
   -- adjust the visible part of the buffer to hint based on the direction
   local direction = opts.direction
   local direction_mode = nil
   if direction == hint.HintDirection.BEFORE_CURSOR then
     bot_line = cursor_pos[1] - 1
-    direction_mode = { cursor_col = cursor_pos[2], direction = direction }
+    direction_mode = { cursor_col = cursor_pos[2] + start_offset, direction = direction }
   elseif direction == hint.HintDirection.AFTER_CURSOR then
     top_line = cursor_pos[1] - 1
-    direction_mode = { cursor_col = cursor_pos[2], direction = direction }
+    direction_mode = { cursor_col = cursor_pos[2] + start_offset, direction = direction }
   end
 
   -- Constrain range of lines if we are in current-line-only mode
@@ -154,6 +162,14 @@ local function hint_with(hint_mode, opts)
   )
 
   local h = nil
+	local jump_offset
+
+	if opts.jump_offset == nil then
+		jump_offset = 0
+	else
+		jump_offset = opts.jump_offset
+	end
+
   if hint_counts == 0 then
     eprintln(' -> there’s no such thing we can see…', opts.teasing)
     clear_namespace(0, grey_cur_ns)
@@ -163,7 +179,7 @@ local function hint_with(hint_mode, opts)
     for _, line_hints in pairs(hints) do
       if #line_hints.hints == 1 then
         h = line_hints.hints[1]
-        vim.api.nvim_win_set_cursor(0, { h.line + 1, h.col - 1})
+        vim.api.nvim_win_set_cursor(0, { h.line + 1, h.col - 1 + jump_offset })
         break
       end
     end
@@ -177,7 +193,8 @@ local function hint_with(hint_mode, opts)
     hl_ns = hl_ns;
     grey_cur_ns = grey_cur_ns;
     top_line = top_line;
-    bot_line = bot_line
+    bot_line = bot_line;
+		jump_offset = jump_offset;
   }
 
   -- grey everything out and add the virtual cursor
@@ -247,7 +264,7 @@ function M.refine_hints(buf_handle, key, teasing, hint_state)
     vim.cmd("normal! m'")
 
     -- JUMP!
-    vim.api.nvim_win_set_cursor(0, { h.line + 1, h.col - 1})
+    vim.api.nvim_win_set_cursor(0, { h.line + 1, h.col - 1 + hint_state.jump_offset })
     return h
   end
 end
