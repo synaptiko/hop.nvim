@@ -321,6 +321,10 @@ function M.hint_char1(opts)
     clear_namespace(0, cur_ns)
     return
   end
+
+	if type(c) ~= 'number' and vim.fn.strchars(c) == 4 then
+		c = vim.fn.strgetchar(c, 3)
+	end
   hint_with(hint.by_case_searching(vim.fn.nr2char(c), true, opts), opts)
 end
 
@@ -334,6 +338,10 @@ function M.hint_char1_line(opts)
         clear_namespace(0, cur_ns)
         return
     end
+
+		if type(c) ~= 'number' and vim.fn.strchars(c) == 4 then
+			c = vim.fn.strgetchar(c, 3)
+		end
     hint_with(hint.by_case_searching_line(vim.fn.nr2char(c), true, opts), opts)
 end
 
@@ -347,11 +355,19 @@ function M.hint_char2(opts)
     clear_namespace(0, cur_ns)
     return
   end
+
+	if type(a) ~= 'number' and vim.fn.strchars(a) == 4 then
+		a = vim.fn.strgetchar(a, 3)
+	end
   local ok2, b = pcall(vim.fn.getchar)
   if not ok2 then
     clear_namespace(0, cur_ns)
     return
   end
+
+	if type(b) ~= 'number' and vim.fn.strchars(b) == 4 then
+		b = vim.fn.strgetchar(b, 3)
+	end
   local pat = vim.fn.nr2char(a) .. vim.fn.nr2char(b)
   hint_with(hint.by_case_searching(pat, true, opts), opts)
 end
